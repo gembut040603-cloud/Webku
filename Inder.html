@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>🔮 Bot Jodoh 😎</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Roboto, Arial;
+      background: #0f172a;
+      color: #f1f5f9;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    /* Splash screen */
+    #splash {
+      position: fixed;
+      inset: 0;
+      background: #000;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      transition: opacity 1s ease;
+    }
+    #splash h1 {
+      font-size: 2rem;
+      color: #ffcc00;
+      animation: glow 2s infinite alternate;
+    }
+    @keyframes glow {
+      from { text-shadow: 0 0 5px #ffcc00; }
+      to { text-shadow: 0 0 25px #ffcc00; }
+    }
+
+    /* App container */
+    .app {
+      display: none;
+      width: 100%;
+      max-width: 420px;
+      height: 90vh;
+      background: #1e293b;
+      border-radius: 14px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .header {
+      background: #0f172a;
+      padding: 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    .avatar {
+      font-size: 28px;
+    }
+    .title { font-weight: bold; }
+
+    .chat {
+      flex: 1;
+      padding: 12px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .bubble {
+      max-width: 80%;
+      padding: 10px 14px;
+      border-radius: 12px;
+      line-height: 1.4;
+    }
+    .bot {
+      align-self: flex-start;
+      background: #334155;
+      border-top-left-radius: 4px;
+    }
+    .user {
+      align-self: flex-end;
+      background: #2563eb;
+      border-top-right-radius: 4px;
+    }
+    .typing {
+      font-style: italic;
+      color: #94a3b8;
+    }
+
+    .controls {
+      display: flex;
+      gap: 8px;
+      padding: 10px;
+      border-top: 1px solid rgba(255,255,255,0.1);
+    }
+    .controls input {
+      flex: 1;
+      border: none;
+      border-radius: 8px;
+      padding: 10px;
+      font-size: 14px;
+    }
+    .controls button {
+      background: #ffcc00;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <!-- Splash -->
+  <div id="splash">
+    <h1>🔮 Meramal Jodohmu...</h1>
+  </div>
+
+  <!-- App -->
+  <div class="app" id="app">
+    <div class="header">
+      <div class="avatar">😎</div>
+      <div>
+        <div class="title">Sang Peramal</div>
+        <div style="font-size:12px;color:#94a3b8;">Ramalan cinta & jodoh</div>
+      </div>
+    </div>
+    <div id="chat" class="chat"></div>
+    <div class="controls">
+      <input id="inputMsg" placeholder="Tulis jawabanmu..." />
+      <button id="sendBtn">Kirim</button>
+    </div>
+  </div>
+
+  <script>
+    const splash = document.getElementById("splash");
+    const app = document.getElementById("app");
+    const chat = document.getElementById("chat");
+    const input = document.getElementById("inputMsg");
+    const sendBtn = document.getElementById("sendBtn");
+
+    let state = 0; // tahap percakapan
+    let username = "";
+    let zodiac = "";
+
+    // Splash keluar setelah 2,5 detik
+    window.addEventListener("load", () => {
+      setTimeout(() => {
+        splash.style.opacity = "0";
+        setTimeout(() => {
+          splash.style.display = "none";
+          app.style.display = "flex";
+          botSay("Halo 👋 Aku sang peramal 😎. Siapa namamu?");
+        }, 1000);
+      }, 2500);
+    });
+
+    // Fungsi chat
+    function appendBubble(text, who="bot") {
+      const div = document.createElement("div");
+      div.className = "bubble " + who;
+      div.innerText = text;
+      chat.appendChild(div);
+      chat.scrollTop = chat.scrollHeight;
+    }
+
+    function botSay(text, delay=800) {
+      const typing = document.createElement("div");
+      typing.className = "bubble bot typing";
+      typing.innerText = "Mengetik...";
+      chat.appendChild(typing);
+      chat.scrollTop = chat.scrollHeight;
+
+      setTimeout(() => {
+        typing.remove();
+        appendBubble(text, "bot");
+      }, delay);
+    }
+
+    // Respon berdasarkan state
+    function nextStep(userInput) {
+      if (state === 0) {
+        username = userInput;
+        botSay(`Senang bertemu denganmu, ${username}. Kapan tanggal lahirmu atau zodiakmu?`);
+        state = 1;
+      } else if (state === 1) {
+        zodiac = userInput;
+        botSay(`Ahh... ${zodiac}, menarik sekali. Sekarang ceritakan, bagaimana keadaan cintamu saat ini?`);
+        state = 2;
+      } else if (state === 2) {
+        const situations = [
+          `Aku bisa merasakan getaran cinta di sekitarmu, ${username}. Ada seseorang yang diam-diam memperhatikanmu...`,
+          `${username}, bintang ${zodiac} sedang bersinar cerah. Pertanda hubungan baru segera hadir.`,
+          `Meskipun hatimu sempat terluka, semesta sedang menyiapkan kejutan indah untukmu, ${username}.`
+        ];
+        const random = situations[Math.floor(Math.random()*situations.length)];
+        botSay(random, 1500);
+        setTimeout(() => {
+          botSay("Ingin aku teruskan ramalan lebih dalam? 🔮");
+        }, 2500);
+        state = 3;
+      } else if (state === 3) {
+        if (/ya|boleh|lanjut/i.test(userInput)) {
+          botSay(`Baiklah... aku melihat sosok yang penuh energi, dia akan hadir lebih dekat dalam hidupmu. Jangan lewatkan tanda-tandanya.`);
+          setTimeout(() => {
+            botSay("Ramalan selesai ✨ Semoga hatimu menemukan jawabannya 💕");
+          }, 2000);
+        } else {
+          botSay("Baik, ramalan berhenti di sini. Ingat, cintamu selalu berharga. ❤️");
+        }
+        state = 4;
+      } else {
+        botSay("Percakapan selesai. Refresh halaman untuk mulai lagi 😎");
+      }
+    }
+
+    // Event kirim pesan
+    sendBtn.addEventListener("click", () => {
+      const val = input.value.trim();
+      if (!val) return;
+      appendBubble(val, "user");
+      input.value = "";
+      nextStep(val);
+    });
+
+    input.addEventListener("keypress", (e) => {
+      if (e.key === "Enter") sendBtn.click();
+    });
+  </script>
+</body>
+</html>
